@@ -1,0 +1,27 @@
+name: Deploy MDN TV public viewer to Cloudflare Pages
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the approved viewer
+        uses: actions/checkout@v4
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate source and video files
+        run: |
+          npm test
+          for f in public/channel-1-ai-news.mp4 public/channel-2-ai-talks.mp4 public/channel-3-ai-history.mp4 public/channel-4-ai-learning.mp4; do
+            test -s "$f" || (echo "Missing video: $f"; exit 1)
+          done
+      - name: Deploy public viewer only
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy public --project-name=media-data-network-tv
