@@ -1,0 +1,22 @@
+[
+  {
+    "num": 1,
+    "name": "Media Data Network AI News",
+    "file": "channel-1-ai-news.mp4"
+  },
+  {
+    "num": 2,
+    "name": "MDN AI Talks & Podcasts",
+    "file": "channel-2-ai-talks.mp4"
+  },
+  {
+    "num": 3,
+    "name": "MDN AI Past, Present & Future",
+    "file": "channel-3-ai-history.mp4"
+  },
+  {
+    "num": 4,
+    "name": "MDN AI Applications & Learning",
+    "file": "channel-4-ai-learning.mp4"
+  }
+]
