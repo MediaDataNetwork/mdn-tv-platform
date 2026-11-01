@@ -1,0 +1,39 @@
+name: Extract demonstration videos
+on:
+  push:
+    paths:
+      - '.github/workflows/extract-demo-videos.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Extract exactly four demonstration MP4s
+        run: |
+          python3 - <<'PY'
+          import pathlib,zipfile
+          root=pathlib.Path('public')
+          archive=root/'MDN_TV_Four_Demo_Videos_Only.zip'
+          expected=['channel-1-ai-news.mp4','channel-2-ai-talks.mp4','channel-3-ai-history.mp4','channel-4-ai-learning.mp4']
+          with zipfile.ZipFile(archive) as z:
+              files={pathlib.PurePosixPath(info.filename).name:info for info in z.infolist() if not info.is_dir()}
+              for name in expected:
+                  if name not in files or files[name].file_size>15_000_000:
+                      raise ValueError('Missing or oversized demo video: '+name)
+                  data=z.read(files[name])
+                  if data[4:8]!=b'ftyp':
+                      raise ValueError('Invalid MP4: '+name)
+                  (root/name).write_bytes(data)
+          print('Extracted four MP4 files')
+          PY
+      - name: Commit playable demonstration assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/*.mp4
+          git diff --cached --quiet || (git commit -m "Extract four MDN TV demo MP4 assets" && git push)
